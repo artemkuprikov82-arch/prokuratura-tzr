@@ -9,13 +9,11 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
 
-        /* Блок авторизации */
-        #loginScreen { padding: 40px 20px; display: flex; justify-content: center; }
-        .login-box { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--gold); padding: 30px; border-radius: 8px; max-width: 420px; width: 100%; text-align: center; }
+        #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: #090d16; }
+        .login-box { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--gold); padding: 30px; border-radius: 8px; max-width: 400px; width: 100%; text-align: center; }
         .login-box h2 { margin: 10px 0 5px; font-size: 20px; text-transform: uppercase; color: var(--gold); }
         .login-box p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
 
-        /* Основной кабинет (скрыт до входа) */
         #mainApp { display: none; }
 
         header { background: #0b1120; border-bottom: 2px solid var(--gold); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
@@ -58,23 +56,98 @@
 
         footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; border-top: 1px solid var(--border); margin-top: 30px; }
     </style>
+    <script>
+        function enterPortal() {
+            var name = document.getElementById("empName").value.trim();
+            var pass = document.getElementById("empPass").value.trim();
+            if (pass === "7400") {
+                document.getElementById("currentUser").innerText = name || "Дежурный прокурор";
+                document.getElementById("loginScreen").style.display = "none";
+                document.getElementById("mainApp").style.display = "block";
+                document.getElementById("loginErr").style.display = "none";
+            } else {
+                document.getElementById("loginErr").style.display = "block";
+            }
+        }
+
+        function exitPortal() {
+            document.getElementById("empPass").value = "";
+            document.getElementById("mainApp").style.display = "none";
+            document.getElementById("loginScreen").style.display = "flex";
+        }
+
+        function switchPage(pageId, btn) {
+            var sections = document.getElementsByClassName("section");
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].className = "section";
+            }
+            var btns = document.getElementsByClassName("tab-btn");
+            for (var j = 0; j < btns.length; j++) {
+                btns[j].className = "tab-btn";
+            }
+            document.getElementById(pageId).className = "section active";
+            btn.className = "tab-btn active";
+        }
+
+        function createBlank() {
+            var type = document.getElementById("docType").value;
+            var num = document.getElementById("docNum").value;
+            var target = document.getElementById("docTarget").value || "[Указать ФИО и должность]";
+            var law = document.getElementById("docLaw").value || "[Указать статью]";
+            var reason = document.getElementById("docReason").value || "[Описать обстоятельства]";
+            var signer = document.getElementById("docSigner").value;
+            var date = new Date().toLocaleDateString("ru-RU");
+
+            var text = "====================================================\n" +
+                       "ПРОКУРАТУРА ТРАКТОРОЗАВОДСКОГО РАЙОНА\n" +
+                       "Адрес: ул. Белостоцкого, д. 11 | Тел.: +7 (993) 935-53-78\n" +
+                       "====================================================\n\n" +
+                       type.toUpperCase() + "\n" +
+                       "Документ " + num + " от " + date + " г.\n\n" +
+                       "В отношении: " + target + "\n" +
+                       "Основание: " + law + "\n\n" +
+                       "СУТЬ ОБРАЩЕНИЯ / ПОСТАНОВЛЕНИЯ:\n" +
+                       reason + "\n\n" +
+                       signer + "\n" +
+                       "Подпись: _______________ / М.П. /";
+
+            document.getElementById("docPreview").value = text;
+            document.getElementById("resultCard").style.display = "block";
+            document.getElementById("copyStatus").style.display = "none";
+        }
+
+        function copyBlank() {
+            var area = document.getElementById("docPreview");
+            area.select();
+            area.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            document.getElementById("copyStatus").style.display = "inline";
+        }
+
+        function filterTable() {
+            var filter = document.getElementById("caseSearch").value.toLowerCase();
+            var rows = document.getElementById("casesTable").getElementsByTagName("tr");
+            for (var i = 1; i < rows.length; i++) {
+                var txt = rows[i].innerText.toLowerCase();
+                rows[i].style.display = txt.indexOf(filter) > -1 ? "" : "none";
+            }
+        }
+    </script>
 </head>
 <body>
 
-<!-- БЛОК ВХОДА -->
 <div id="loginScreen">
     <div class="login-box">
         <div style="font-size: 34px;">⚖️</div>
         <h2>АИС «Надзор»</h2>
         <p>Прокуратура Тракторозаводского района (ул. Белостоцкого, 11)</p>
         <input type="text" id="empName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">
-        <input type="password" id="empPass" placeholder="Код доступа (введите: 7400)" onkeydown="if(event.key==='Enter') doLogin()">
-        <button type="button" class="btn" style="width:100%;" onclick="doLogin()">Войти в систему</button>
+        <input type="password" id="empPass" placeholder="Код доступа (введите: 7400)" onkeyup="if(event.keyCode===13) enterPortal()">
+        <button type="button" class="btn" style="width:100%;" onclick="enterPortal()">Войти в систему</button>
         <p id="loginErr" style="color: var(--red); display:none; margin-top:10px; margin-bottom:0;">Неверный код доступа! Введите 7400.</p>
     </div>
 </div>
 
-<!-- КАБИНЕТ ПРОКУРОРА -->
 <div id="mainApp">
     <header>
         <div class="brand">
@@ -83,77 +156,10 @@
         </div>
         <div class="user-badge">
             <span>👤 Сотрудник: <strong id="currentUser">Прокурор</strong></span>
-            <button type="button" class="btn btn-sm" onclick="doLogout()">Выход</button>
+            <button type="button" class="btn btn-sm" onclick="exitPortal()">Выход</button>
         </div>
     </header>
 
     <nav>
-        <button type="button" class="tab-btn active" onclick="openTab('generator', this)">📄 Создать документ / заявление</button>
-        <button type="button" class="tab-btn" onclick="openTab('cases', this)">🗂️ Реестр дел и ордеров</button>
-        <button type="button" class="tab-btn" onclick="openTab('codex', this)">📖 Памятка (УК/УПК)</button>
-        <button type="button" class="tab-btn" onclick="openTab('staff', this)">👥 Руководство</button>
-    </nav>
-
-    <div class="container">
-        <div id="generator" class="section active">
-            <div class="grid-2">
-                <div class="card">
-                    <h3>Заполнение данных документа</h3>
-                    <label>Тип документа</label>
-                    <select id="docType">
-                        <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление / обращение в прокуратуру</option>
-                        <option value="ПОСТАНОВЛЕНИЕ о возбуждении уголовного дела">Постановление о возбуждении уголовного дела</option>
-                        <option value="ОРДЕР на задержание и обыск">Ордер на задержание и проведение обыска</option>
-                        <option value="ПОСТАНОВЛЕНИЕ о проведении прокурорской проверки">Постановление о прокурорской проверке</option>
-                    </select>
-
-                    <label>Номер документа</label>
-                    <input type="text" id="docNum" value="№ 74-01/2026">
-
-                    <label>В отношении кого (ФИО, звание, организация)</label>
-                    <input type="text" id="docTarget" placeholder="Например: Сержант ППС Иванов И. И.">
-
-                    <label>Основание (статья УК / КоАП / УПК)</label>
-                    <input type="text" id="docLaw" placeholder="Например: ст. 286 УК">
-
-                    <label>Суть ситуации и требования</label>
-                    <textarea id="docReason" rows="3" placeholder="Опишите обстоятельства дела..."></textarea>
-
-                    <label>Должностное лицо / Заявитель</label>
-                    <select id="docSigner">
-                        <option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>
-                        <option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>
-                    </select>
-
-                    <button type="button" class="btn" onclick="makeDoc()">Сформировать бланк</button>
-                </div>
-
-                <div class="card" id="resultCard">
-                    <h3>Готовый документ</h3>
-                    <p style="font-size:13px; color:var(--muted);">Бланк сформирован. Нажмите кнопку ниже, чтобы скопировать текст:</p>
-                    <textarea class="doc-output" id="docPreview" readonly></textarea>
-                    <div style="margin-top: 10px;">
-                        <button type="button" class="btn btn-blue" onclick="copyText()">📋 Скопировать документ</button>
-                        <span class="copy-status" id="copyStatus">✅ Скопировано!</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="cases" class="section">
-            <div class="card">
-                <h3>Активные дела, проверки и выданные ордера</h3>
-                <input type="text" id="caseSearch" onkeyup="searchTable()" placeholder="🔍 Поиск по номеру дела, фамилии или статье...">
-                <table id="casesTable">
-                    <tr>
-                        <th>№ Дела</th>
-                        <th>Фигурант / Организация</th>
-                        <th>Статья / Предмет</th>
-                        <th>Ответственный</th>
-                        <th>Статус</th>
-                    </tr>
-                    <tr>
-                        <td>УД-014</td>
-                        <td>Лейтенант МВД Петров А. С.</td>
-                        <td>ст. 286 УК (Превышение полномочий)</td>
-                        <td>Зинченко А. А.</td>
+        <button type="button" class="tab-btn active" onclick="switchPage('generator', this)">📄 Создать документ / заявление</button>
+        <button type="button" class="tab-btn" onclick="switchPage('cases', this)">🗂️ Реестр дел и ордеров</button>
