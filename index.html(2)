@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КрасноБелое — магазин у дома</title>
+<style>
+  :root { --red:#d0021b; --dark:#222; --bg:#f7f7f7; }
+  * { box-sizing:border-box; margin:0; font-family:Arial, sans-serif; }
+  body { background:var(--bg); }
+
+  header { background:var(--red); color:#fff; padding:14px 24px;
+           display:flex; align-items:center; gap:24px; position:sticky; top:0; z-index:10; }
+  header .logo { font-size:22px; font-weight:bold; letter-spacing:1px; cursor:pointer; }
+  header input { flex:1; max-width:480px; padding:10px 14px; border:0; border-radius:6px; font-size:15px; }
+  .cart-btn { margin-left:auto; background:#fff; color:var(--red); border:0;
+              padding:10px 18px; border-radius:6px; font-weight:bold; cursor:pointer; }
+
+  .promo { background:#fff; margin:20px; padding:28px; border-radius:10px;
+           border-left:6px solid var(--red); }
+  .promo h1 { font-size:26px; margin-bottom:6px; }
+  .promo p { color:#666; }
+
+  .filters { display:flex; gap:10px; margin:0 20px 16px; flex-wrap:wrap; }
+  .filters button { padding:8px 16px; border:1px solid #ddd; background:#fff;
+                    border-radius:20px; cursor:pointer; }
+  .filters button.active { background:var(--red); color:#fff; border-color:var(--red); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+          gap:16px; margin:0 20px 40px; }
+  .card { background:#fff; border-radius:10px; padding:14px; display:flex;
+          flex-direction:column; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .card .img { background:#eee; border-radius:8px; height:130px; display:flex;
+               align-items:center; justify-content:center; font-size:44px; margin-bottom:10px; }
+  .card .name { font-size:15px; flex:1; }
+  .card .meta { color:#999; font-size:12px; margin:4px 0; }
+  .card .price { font-size:19px; font-weight:bold; }
+  .card .price s { color:#aaa; font-size:13px; font-weight:normal; margin-left:6px; }
+  .card .price span.red { color:var(--red); }
+  .add { margin-top:10px; background:var(--red); color:#fff; border:0;
+         padding:10px; border-radius:6px; cursor:pointer; font-size:14px; }
+  .add:active { transform:scale(.98); }
+  .badge { position:absolute; margin:4px; background:var(--red); color:#fff;
+           font-size:11px; padding:3px 8px; border-radius:4px; }
+
+  /* корзина */
+  #cartPanel { position:fixed; right:-420px; top:0; width:400px; height:100%;
+               background:#fff; box-shadow:-4px 0 16px rgba(0,0,0,.15);
+               transition:right .25s; display:flex; flex-direction:column; z-index:20; }
+  #cartPanel.open { right:0; }
+  #cartPanel h3 { padding:16px; background:var(--red); color:#fff; }
+  #cartItems { flex:1; overflow-y:auto; padding:12px; }
+  .cart-row { display:flex; justify-content:space-between; align-items:center;
+              border-bottom:1px solid #eee; padding:10px 0; gap:8px; }
+  .cart-row .qty { display:flex; gap:6px; align-items:center; }
+  .cart-row .qty button { width:26px; height:26px; border:1px solid #ddd;
+                          background:#fff; border-radius:4px; cursor:pointer; }
+  .cart-total { padding:16px; border-top:2px solid var(--red); font-size:18px; font-weight:bold; }
+  .checkout { margin:0 16px 16px; background:var(--red); color:#fff; border:0;
+              padding:14px; border-radius:8px; font-size:16px; cursor:pointer; }
+  .empty { color:#999; text-align:center; margin-top:40px; }
+
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:15; }
+  #overlay.show { display:block; }
+
+  footer { background:var(--dark); color:#aaa; text-align:center; padding:24px; font-size:13px; }
+  footer .warn { color:#e0a020; margin-bottom:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="scrollTo(0,0)">КРАСНО<span style="color:#222">БЕЛОЕ</span></div>
+  <input id="search" placeholder="Поиск по каталогу..." oninput="render()">
+  <button class="cart-btn" onclick="toggleCart()">🛒 Корзина (<span id="cartCount">0</span>)</button>
+</header>
+
+<div class="promo">
+  <h1>Выгодно каждый день</h1>
+  <p>Акции на популярные товары. Доставка или самовывоз.</p>
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="grid" id="grid"></div>
+
+<div id="overlay" onclick="toggleCart()"></div>
+<div id="cartPanel">
+  <h3>Ваша корзина</h3>
+  <div id="cartItems"></div>
+  <div class="cart-total">Итого: <span id="cartTotal">0.00</span> ₽</div>
+  <button class="checkout" onclick="checkout()">Оформить заказ</button>
+</div>
+
+<footer>
+  <div class="warn">Продажа алкоголя и табака лицам младше 18 лет запрещена.</div>
+  ООО «Пример Ритейл». Демо-сайт. Все цены вымышленные.
+</footer>
+
+<script>
+const PRODUCTS = [
+  {id:1, name:"Пиво светлое фильтрованное 0,5 л", cat:"Алкоголь", emoji:"🍺", price:129, old:159, alc:true},
+  {id:2, name:"Вино красное сухое 0,7 л",          cat:"Алкоголь", emoji:"🍷", price:599, old:749, alc:true},
+  {id:3, name:"Водка классическая 0,5 л",          cat:"Алкоголь", emoji:"🥃", price:549, old:null, alc:true},
+  {id:4, name:"Сигареты (витрина-пример)",         cat:"Табак",    emoji:"🚬", price:250, old:null, alc:true},
+  {id:5, name:"Минеральная вода 0,5 л",            cat:"Напитки",  emoji:"💧", price:55,  old:null},
+  {id:6, name:"Кола 1,5 л",                        cat:"Напитки",  emoji:"🥤", price:98,  old:120},
+  {id:7, name:"Чипсы сырые 150 г",                 cat:"Снеки",    emoji:"🍟", price:99,  old:null},
+  {id:8, name:"Сухарики ржаные 40 г",              cat:"Снеки",    emoji:"🥨", price:45,  old:59},
+  {id:9, name:"Шоколад молочный 90 г",             cat:"Сладкое",  emoji:"🍫", price:89,  old:null},
+  {id:10,name:"Печенье сахарное 220 г",            cat:"Сладкое",  emoji:"🍪", price:64,  old:79},
+  {id:11,name:"Молоко пастеризованное 1 л",        cat:"Продукты", emoji:"🥛", price:79,  old:null},
+  {id:12,name:"Хлеб нарезной 400 г",               cat:"Продукты", emoji:"🍞", price:42,  old:null},
+];
+
+const CATS = ["Все", ...new Set(PRODUCTS.map(p => p.cat))];
+let activeCat = "Все";
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+
+document.getElementById("filters").innerHTML = CATS.map(c =>
+  `<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join("");
+
+function setCat(c) {
+  activeCat = c;
+  document.querySelectorAll("#filters button").forEach(b =>
+    b.classList.toggle("active", b.textContent === c));
+  render();
+}
+
+function fmt(n) { return n.toFixed(2); }
+
+function render() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const grid = document.getElementById("grid");
+  const list = PRODUCTS.filter(p =>
+    (activeCat === "Все" || p.cat === activeCat) &&
+    p.name.toLowerCase().includes(q));
+  grid.innerHTML = list.map(p => {
+    const ageTag = p.alc ? `<div class="badge">18+</div>` : "";
+    return `<div class="card" style="position:relative">
+      ${ageTag}
+      <div class="img">${p.emoji}</div>
+      <div class="name">${p.name}</div>
+      <div class="meta">${p.cat}${p.alc ? " · продажа с 8:00 до 23:00" : ""}</div>
+      <div class="price">${fmt(p.price)} ₽${p.old ? `<s>${p.old} ₽</s>` : ""}</div>
+      <button class="add" onclick="add(${p.id})">В корзину</button>
+    </div>`;
+  }).join("") || `<p style="grid-column:1/-1;color:#999">Ничего не найдено</p>`;
+}
+
+function add(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  save(); renderCart();
+}
+function dec(id) {
+  if (--cart[id] <= 0) delete cart[id];
+  save(); renderCart();
+}
+function save() { localStorage.setItem("cart", JSON.stringify(cart)); updateCount(); }
+
+function updateCount() {
+  document.getElementById("cartCount").textContent =
+    Object.values(cart).reduce((a,b) => a+b, 0);
+}
+
+function renderCart() {
+  const box = document.getElementById("cartItems");
+  const ids = Object.keys(cart);
+  if (!ids.length) {
+    box.innerHTML = `<div class="empty">Корзина пуста 🛒</div>`;
+  } else {
+    box.innerHTML = ids.map(id => {
+      const p = PRODUCTS.find(x => x.id == id);
+      return `<div class="cart-row">
+        <div style="flex:1">${p.emoji} ${p.name}</div>
+        <div class="qty">
+          <button onclick="dec(${id})">−</button>
+          <b>${cart[id]}</b>
+          <button onclick="add(${id})">+</button>
+        </div>
+        <div style="min-width:80px;text-align:right">${fmt(p.price*cart[id])} ₽</div>
+      </div>`;
+    }).join("");
+  }
+  const total = ids.reduce((s,id) =>
+    s + PRODUCTS.find(x => x.id == id).price * cart[id], 0);
+  document.getElementById("cartTotal").textContent = fmt(total);
+}
+
+function toggleCart() {
+  document.getElementById("cartPanel").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+}
+
+function checkout() {
+  if (!Object.keys(cart).length) { alert("Корзина пуста"); return; }
+  const total = document.getElementById("cartTotal").textContent;
+  alert(`Демо-заказ на ${total} ₽ оформлен!\n(реальная оплата и учёт — задача бэкенда)`);
+  cart = {}; save(); renderCart(); toggleCart();
+}
+
+updateCount(); render(); renderCart();
+</script>
+</body>
+</html>
