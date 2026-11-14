@@ -2,213 +2,237 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Касса — КрасноБелое (демо)</title>
+<title>POS-терминал · Рабочее место кассира</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; background: #1e1f24; color: #eee; }
-  header { background: #d0021b; padding: 12px 20px; font-weight: bold; font-size: 18px; }
-  main { padding: 16px; max-width: 900px; margin: 0 auto; }
-  #scan { width: 100%; padding: 14px; font-size: 18px; border: 0; border-radius: 8px; }
-  .hint { color: #888; font-size: 12px; margin: 6px 0 14px; }
-  .item { background: #2a2b31; border-radius: 8px; padding: 10px; margin-bottom: 8px;
-          display: flex; align-items: center; gap: 10px; }
-  .item .name { flex: 1; }
-  .item .sub { color: #999; font-size: 12px; }
-  .item button { width: 28px; height: 28px; border: 0; background: #3a3b42; color: #fff;
-                 border-radius: 4px; cursor: pointer; font-size: 16px; }
-  .item .sum { width: 90px; text-align: right; font-weight: bold; }
-  .item .del { background: none; color: #ff7b7b; font-size: 16px; }
-  #empty { color: #777; text-align: center; margin-top: 40px; }
+  * { box-sizing:border-box; margin:0; font-family:"Segoe UI", Arial, sans-serif; }
+  body { height:100vh; display:flex; flex-direction:column; background:#14161b; color:#e8e8e8; overflow:hidden; }
 
-  #paybox { background: #26272d; border-radius: 10px; padding: 16px; margin-top: 16px; }
-  #total { font-size: 32px; font-weight: bold; color: #7fd57f; text-align: center; }
-  .btn { display: block; width: 100%; padding: 14px; margin-top: 8px; border: 0;
-         border-radius: 8px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
-  .cash { background: #1e8e3e; } .card { background: #1a5fb4; } .void { background: #444; }
-  #msg { text-align: center; margin: 10px 0; min-height: 20px; }
-  #msg.err { color: #ff7b7b; } #msg.ok { color: #7fd57f; }
+  header { background:#a3000f; padding:8px 16px; display:flex; gap:24px; font-size:14px; }
+  header b { letter-spacing:1px; }
+  header .r { margin-left:auto; }
 
-  #overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-             background: rgba(0,0,0,0.6); display: none; }
-  #overlay.show { display: block; }
-  #ticket { background: #fff; color: #000; width: 320px; margin: 40px auto;
-            padding: 20px; font-family: "Courier New", monospace; font-size: 13px; }
-  #ticket h3 { text-align: center; margin: 0 0 10px; }
-  #ticket .line { display: flex; justify-content: space-between; margin: 3px 0; }
-  #ticket .hr { border-top: 1px dashed #999; margin: 8px 0; }
-  #ticket button { width: 100%; margin-top: 12px; padding: 10px; background: #d0021b;
-                   color: #fff; border: 0; cursor: pointer; }
+  main { flex:1; display:flex; min-height:0; }
+
+  /* ЛЕВАЯ ЧАСТЬ — ЧЕК */
+  #left { flex:1.3; display:flex; flex-direction:column; padding:12px; min-width:0; border-right:2px solid #2a2d35; }
+  #scan { padding:12px; font-size:17px; border:0; border-radius:6px; outline:none; background:#fff; color:#000; }
+  .hint { font-size:11px; color:#7a7f8a; margin:5px 0 10px; }
+  #list { flex:1; overflow-y:auto; }
+  .pos { background:#1e2129; border-left:4px solid #d0021b; border-radius:4px;
+         padding:8px 10px; margin-bottom:6px; display:flex; align-items:center; gap:8px; font-size:14px; }
+  .pos .n { flex:1; } .pos .s { width:26px; text-align:center; font-weight:bold; }
+  .pos .c { color:#8a8f99; font-size:12px; width:40px; text-align:right; }
+  .pos button { width:24px; height:24px; border:0; border-radius:3px; background:#2e323c;
+                color:#fff; cursor:pointer; }
+  .pos .x { background:none; color:#ff6b6b; font-size:14px; }
+  #empty { color:#5c616b; text-align:center; margin-top:60px; font-size:14px; }
+
+  /* ПРАВАЯ ЧАСТЬ — ПАНЕЛЬ ОПЕРАЦИЙ */
+  #right { flex:1; padding:14px; display:flex; flex-direction:column; gap:10px; background:#191c22; }
+  #display { background:#000; border:2px solid #2e323c; border-radius:6px; padding:14px; text-align:center; }
+  #display .lbl { font-size:11px; color:#7a7f8a; letter-spacing:2px; }
+  #display .val { font-size:38px; font-weight:bold; color:#4cd964; font-family:"Consolas", monospace; }
+  #display .cnt { font-size:12px; color:#8a8f99; margin-top:4px; }
+
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .pad button { padding:16px 0; font-size:18px; border:0; border-radius:6px;
+                background:#242832; color:#fff; cursor:pointer; }
+  .pad button:active { background:#2e323c; }
+  .pad .c { color:#4cd964; }
+
+  .ops { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ops button { padding:14px 0; border:0; border-radius:6px; color:#fff;
+                font-weight:bold; font-size:14px; cursor:pointer; }
+  .b-cash { background:#1e7e34; } .b-card { background:#155d9c; }
+  .b-void { background:#3a3f4b; } .b-alc  { background:#6a4fd8; }
+
+  #msg { text-align:center; font-size:13px; min-height:18px; }
+  #msg.err { color:#ff6b6b; } #msg.ok { color:#4cd964; }
+
+  .note { font-size:11px; color:#5c616b; text-align:center; margin-top:auto; }
+
+  /* ОКНО ЧЕКА */
+  #ov { position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; }
+  #ov.show { display:block; }
+  #tk { background:#fff; color:#000; width:300px; margin:30px auto; padding:18px;
+        font-family:"Courier New", monospace; font-size:13px; }
+  #tk h3 { text-align:center; margin-bottom:8px; font-size:15px; }
+  #tk .l { display:flex; justify-content:space-between; margin:2px 0; }
+  #tk .hr { border-top:1px dashed #888; margin:6px 0; }
+  #tk .t { font-weight:bold; font-size:15px; }
+  #tk button { width:100%; margin-top:10px; padding:9px; background:#a3000f; color:#fff;
+               border:0; border-radius:4px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<header>КРАСНОБЕЛОЕ · КАССА №1</header>
+<header>
+  <b>POS · КАССА №1</b>
+  <span>Смена: Иванова А.</span>
+  <span class="r" id="clock"></span>
+</header>
 
 <main>
-  <input id="scan" placeholder="Введите штрихкод и нажмите Enter" autofocus>
-  <div class="hint">Попробуйте коды: 111, 222, 333, 444, 555, 666</div>
+  <div id="left">
+    <input id="scan" placeholder="▼ СКАН ШТРИХКОДА + ENTER" autofocus autocomplete="off">
+    <div class="hint">Тестовые коды: 111 пиво · 222 вино · 333 водка · 444 вода · 555 чипсы · 666 хлеб</div>
+    <div id="list"></div>
+    <div id="empty">── ЧЕК ПУСТ ──<br><br>Отсканируйте товар</div>
+  </div>
 
-  <div id="list"></div>
-  <div id="empty">Чек пуст. Введите код товара.</div>
+  <div id="right">
+    <div id="display">
+      <div class="lbl">ИТОГО К ОПЛАТЕ</div>
+      <div class="val" id="total">0.00</div>
+      <div class="cnt" id="cnt">позиций: 0</div>
+    </div>
 
-  <div id="paybox">
-    <div id="total">0.00 ₽</div>
+    <div class="pad">
+      <button onclick="key('1')">1</button><button onclick="key('2')">2</button><button onclick="key('3')">3</button>
+      <button onclick="key('4')">4</button><button onclick="key('5')">5</button><button onclick="key('6')">6</button>
+      <button onclick="key('7')">7</button><button onclick="key('8')">8</button><button onclick="key('9')">9</button>
+      <button onclick="key('C')">C</button><button onclick="key('0')">0</button><button class="c" onclick="key('OK')">OK</button>
+    </div>
+
     <div id="msg"></div>
-    <label style="font-size:14px"><input type="checkbox" id="age"> Покупателю 18+ подтверждён</label>
-    <button class="btn cash" onclick="pay('cash')">НАЛИЧНЫЕ</button>
-    <button class="btn card" onclick="pay('card')">КАРТА</button>
-    <button class="btn void" onclick="clearAll()">ОТМЕНИТЬ ЧЕК</button>
+
+    <div class="ops">
+      <button class="b-cash" onclick="pay(1)">НАЛИЧНЫЕ</button>
+      <button class="b-card" onclick="pay(2)">КАРТА</button>
+      <button class="b-void" onclick="voidAll()">ОТМЕНА ЧЕКА</button>
+      <button class="b-alc" onclick="askAge()">18+ ПОДТВЕРЖДЁН</button>
+    </div>
+
+    <div class="note">Режим: ОНЛАЙН · ККТ: демо (не подключена)</div>
   </div>
 </main>
 
-<div id="overlay" onclick="closeTicket()"><div id="ticket" onclick="event.stopPropagation()"></div></div>
+<div id="ov"><div id="tk"></div></div>
 
 <script>
 "use strict";
 
 var PRODUCTS = {
-  "111": { name: "Пиво светлое 0,5 л",       price: 129, alc: true },
-  "222": { name: "Вино красное сухое 0,7 л", price: 599, alc: true },
-  "333": { name: "Водка классическая 0,5 л", price: 549, alc: true },
-  "444": { name: "Минеральная вода 0,5 л",   price: 55  },
-  "555": { name: "Чипсы 150 г",              price: 99  },
-  "666": { name: "Хлеб нарезной 400 г",      price: 42  }
+  "111": { name:"Пиво светлое 0,5 л",       price:129, alc:true  },
+  "222": { name:"Вино красное сухое 0,7 л", price:599, alc:true  },
+  "333": { name:"Водка классическая 0,5 л", price:549, alc:true  },
+  "444": { name:"Минеральная вода 0,5 л",   price:55             },
+  "555": { name:"Чипсы 150 г",              price:99             },
+  "666": { name:"Хлеб нарезной 400 г",      price:42             }
 };
 
 var cart = {};
+var ageOK = false;
 
-function alcoholForbidden() {
-  var h = new Date().getHours();
-  return h >= 23 || h < 8;
-}
-
-function say(text, cls) {
+function say(t, c) {
   var m = document.getElementById("msg");
-  m.textContent = text;
-  m.className = cls || "";
+  m.textContent = t; m.className = c || "";
 }
+function timeAlc() { var h = new Date().getHours(); return h >= 23 || h < 8; }
 
 function add(code) {
   var p = PRODUCTS[code];
-  if (!p) { say("Товар не найден: " + code, "err"); return; }
-  if (p.alc && alcoholForbidden()) {
-    say("Алкоголь: продажа запрещена с 23:00 до 08:00", "err");
-    return;
-  }
+  if (!p) { say("✕ ТОВАР НЕ НАЙДЕН: " + code, "err"); return; }
+  if (p.alc && timeAlc()) { say("✕ АЛКОГОЛЬ: ЗАПРЕЩЕНО 23:00–08:00", "err"); return; }
   cart[code] = (cart[code] || 0) + 1;
-  say("Добавлено: " + p.name, "ok");
+  say("✓ " + p.name + " · " + p.price.toFixed(2) + " ₽", "ok");
   render();
 }
+function chg(code, d) { cart[code] += d; if (cart[code] <= 0) delete cart[code]; render(); }
+function rm(code) { delete cart[code]; render(); }
+function voidAll() { cart = {}; ageOK = false; say("ЧЕК ОТМЕНЁН", "ok"); render(); }
+function askAge() { ageOK = true; say("✓ Возраст 18+ подтверждён", "ok"); }
 
-function qty(code, delta) {
-  cart[code] = cart[code] + delta;
-  if (cart[code] <= 0) delete cart[code];
-  render();
-}
-
-function remove(code) {
-  delete cart[code];
-  render();
-}
-
-function clearAll() {
-  cart = {};
-  say("Чек отменён", "ok");
-  render();
-}
-
-function totalSum() {
-  var s = 0, c;
-  for (c in cart) s += PRODUCTS[c].price * cart[c];
-  return s;
-}
+function sum() { var s = 0, c; for (c in cart) s += PRODUCTS[c].price * cart[c]; return s; }
 
 function render() {
-  var html = "", code, p;
-  for (code in cart) {
-    p = PRODUCTS[code];
-    html += '<div class="item">' +
-      '<div class="name">' + p.name +
-        '<div class="sub">' + (p.alc ? "18+ · " : "") + p.price + " ₽/шт · код " + code + '</div></div>' +
-      '<button onclick="qty(\'' + code + '\',-1)">−</button>' +
-      '<b>' + cart[code] + '</b>' +
-      '<button onclick="qty(\'' + code + '\',1)">+</button>' +
-      '<div class="sum">' + (p.price * cart[code]).toFixed(2) + ' ₽</div>' +
-      '<button class="del" onclick="remove(\'' + code + '\')">✕</button>' +
-    '</div>';
+  var h = "", c;
+  for (c in cart) {
+    var p = PRODUCTS[c];
+    h += '<div class="pos">' +
+      '<div class="n">' + p.name + (p.alc ? ' <span style="color:#ff6b6b">18+</span>' : "") + '</div>' +
+      '<button onclick="chg(\'' + c + '\',-1)">−</button>' +
+      '<div class="s">' + cart[c] + '</div>' +
+      '<button onclick="chg(\'' + c + '\',1)">+</button>' +
+      '<div class="c">' + (p.price * cart[c]).toFixed(2) + '</div>' +
+      '<button class="x" onclick="rm(\'' + c + '\')">✕</button></div>';
   }
-  document.getElementById("list").innerHTML = html;
-  document.getElementById("empty").style.display = html ? "none" : "block";
-  document.getElementById("total").textContent = totalSum().toFixed(2) + " ₽";
+  document.getElementById("list").innerHTML = h;
+  document.getElementById("empty").style.display = h ? "none" : "block";
+  document.getElementById("total").textContent = sum().toFixed(2);
+  var q = 0; for (c in cart) q += cart[c];
+  document.getElementById("cnt").textContent = "позиций: " + q;
 }
 
+/* цифровая панель вводит код товара */
+function key(k) {
+  var f = document.getElementById("scan");
+  if (k === "C") { f.value = ""; f.focus(); return; }
+  if (k === "OK") { doScan(); return; }
+  f.value += k; f.focus();
+}
+function doScan() {
+  var f = document.getElementById("scan");
+  var code = f.value.trim(); f.value = "";
+  if (code) add(code); f.focus();
+}
+document.getElementById("scan").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") doScan();
+});
+
 function pay(method) {
-  var codes = [], c;
-  for (c in cart) codes.push(c);
-  if (codes.length === 0) { say("Чек пуст", "err"); return; }
+  var codes = [], c; for (c in cart) codes.push(c);
+  if (!codes.length) { say("✕ ЧЕК ПУСТ", "err"); return; }
 
   var hasAlc = false;
   for (var i = 0; i < codes.length; i++) if (PRODUCTS[codes[i]].alc) hasAlc = true;
+  if (hasAlc && !ageOK) { say("✕ ПОДТВЕРДИТЕ 18+ (кнопка)", "err"); return; }
+  if (hasAlc && timeAlc()) { say("✕ ВРЕМЯ ПРОДАЖИ АЛКОГОЛЯ ЗАПРЕЩЕНО", "err"); return; }
 
-  if (hasAlc && !document.getElementById("age").checked) {
-    say("Подтвердите возраст покупателя (18+)", "err");
-    return;
-  }
-  if (hasAlc && alcoholForbidden()) {
-    say("Алкоголь: продажа запрещена с 23:00 до 08:00", "err");
-    return;
-  }
-
-  var total = totalSum();
-  var changeLine = "";
-
-  if (method === "cash") {
-    var given = prompt("Сумма от покупателя, ₽:", Math.ceil(total));
-    if (given === null) return;
-    var g = parseFloat(given.replace(",", "."));
-    if (isNaN(g) || g < total) { say("Недостаточно наличных", "err"); return; }
-    changeLine = '<div class="line"><span>Внесено:</span><span>' + g.toFixed(2) + ' ₽</span></div>' +
-      '<div class="line"><b>СДАЧА:</b><span>' + (g - total).toFixed(2) + ' ₽</span></div>';
+  var total = sum(), extra = "";
+  if (method === 1) {
+    var g = prompt("ВНЕСЕНО НАЛИЧНЫМИ, ₽:", Math.ceil(total));
+    if (g === null) return;
+    var v = parseFloat(String(g).replace(",", "."));
+    if (isNaN(v) || v < total) { say("✕ НЕДОСТАТОЧНО НАЛИЧНЫХ", "err"); return; }
+    extra = '<div class="l"><span>Внесено:</span><span>' + v.toFixed(2) + '</span></div>' +
+            '<div class="l"><span>СДАЧА:</span><span><b>' + (v - total).toFixed(2) + '</b></span></div>';
   }
 
-  var rows = "", j, pi;
+  var rows = "", j;
   for (j = 0; j < codes.length; j++) {
-    pi = PRODUCTS[codes[j]];
-    rows += '<div class="line"><span>' + pi.name + '</span></div>' +
-            '<div class="line"><span>&nbsp;&nbsp;' + cart[codes[j]] + ' × ' + pi.price.toFixed(2) +
-            '</span><span>' + (pi.price * cart[codes[j]]).toFixed(2) + ' ₽</span></div>';
+    var pp = PRODUCTS[codes[j]];
+    rows += '<div class="l"><span>' + pp.name + '</span></div>' +
+            '<div class="l"><span>&nbsp;&nbsp;' + cart[codes[j]] + '×' + pp.price.toFixed(2) +
+            '</span><span>' + (pp.price * cart[codes[j]]).toFixed(2) + '</span></div>';
   }
 
-  document.getElementById("ticket").innerHTML =
-    '<h3>ЧЕК</h3>' +
-    '<div class="line"><span>Магазин «КрасноБелое» (демо)</span></div>' +
-    '<div class="line"><span>' + new Date().toLocaleString("ru-RU") + '</span></div>' +
+  document.getElementById("tk").innerHTML =
+    '<h3>★ ЧЕК ★<br>Магазин «КрасноБелое»</h3>' +
+    '<div class="l"><span>' + new Date().toLocaleString("ru-RU") + '</span></div>' +
+    '<div class="l"><span>Касса 1 · Иванова А.</span></div>' +
     '<div class="hr"></div>' + rows +
     '<div class="hr"></div>' +
-    '<div class="line"><b>ИТОГО:</b><b>' + total.toFixed(2) + ' ₽</b></div>' +
-    '<div class="line"><span>Оплата:</span><span>' + (method === "cash" ? "наличные" : "карта") + '</span></div>' +
-    changeLine +
-    (hasAlc ? '<div class="line"><span>Продажа 18+, возраст подтверждён</span></div>' : "") +
-    '<button onclick="closeTicket()">ЗАКРЫТЬ</button>';
+    '<div class="l t"><span>ИТОГО:</span><span>' + total.toFixed(2) + ' ₽</span></div>' +
+    '<div class="l"><span>Оплата:</span><span>' + (method === 1 ? "НАЛИЧНЫЕ" : "КАРТА") + '</span></div>' +
+    extra +
+    (hasAlc ? '<div class="l"><span>18+ · возраст подтверждён</span></div>' : "") +
+    '<div class="hr"></div>' +
+    '<div class="l"><span style="font-size:11px">ДЕМО-РЕЖИМ · ККТ НЕ ПОДКЛЮЧЕНА</span></div>' +
+    '<button onclick="closeTk()">ЗАКРЫТЬ</button>';
 
-  document.getElementById("overlay").className = "show";
-  cart = {};
-  render();
-  document.getElementById("age").checked = false;
+  document.getElementById("ov").className = "show";
+  cart = {}; ageOK = false; render();
 }
-
-function closeTicket() {
-  document.getElementById("overlay").className = "";
-  say("Чек пробит", "ok");
+function closeTk() {
+  document.getElementById("ov").className = "";
+  say("✓ ЧЕК ЗАКРЫТ · СЛЕДУЮЩИЙ ПОКУПАТЕЛЬ", "ok");
   document.getElementById("scan").focus();
 }
 
-document.getElementById("scan").addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    var code = this.value.trim();
-    this.value = "";
-    if (code !== "") add(code);
-  }
-});
+setInterval(function () {
+  document.getElementById("clock").textContent = new Date().toLocaleTimeString("ru-RU");
+}, 1000);
 
 render();
 </script>
