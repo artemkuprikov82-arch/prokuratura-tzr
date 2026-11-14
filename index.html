@@ -1,156 +1,155 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>АИС «Надзор» | Прокуратура Тракторозаводского района</title>
-    <style>
-        :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --gold: #eab308; --blue: #3b82f6; --green: #22c55e; --red: #ef4444; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
-
-        #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: #090d16; }
-        .login-box { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--gold); padding: 30px; border-radius: 8px; max-width: 400px; width: 100%; text-align: center; }
-        .login-box h2 { margin: 10px 0 5px; font-size: 20px; text-transform: uppercase; color: var(--gold); }
-        .login-box p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
-
-        #mainApp { display: none; }
-
-        header { background: #0b1120; border-bottom: 2px solid var(--gold); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .brand h1 { margin: 0; font-size: 17px; text-transform: uppercase; }
-        .brand span { font-size: 12px; color: var(--muted); display: block; }
-        .user-badge { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
-
-        nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 25px; display: flex; gap: 5px; overflow-x: auto; }
-        .tab-btn { background: none; border: none; color: var(--muted); padding: 14px 18px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
-        .tab-btn:hover { color: var(--text); }
-        .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-        .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 22px; margin-bottom: 20px; }
-        .card h3 { margin-top: 0; color: var(--gold); font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-
-        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
-        input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 5px; margin-bottom: 15px; font-family: inherit; font-size: 14px; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
-        .btn { background: var(--gold); color: #000; border: none; padding: 11px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .btn:hover { background: #ca8a04; }
-        .btn-blue { background: var(--blue); color: #fff; }
-        .btn-blue:hover { background: #2563eb; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; background: #334155; color: #fff; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid var(--border); padding: 11px; text-align: left; }
-        th { background: #0f172a; color: var(--gold); }
-        .tag { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .tag-work { background: rgba(234, 179, 8, 0.2); color: var(--gold); }
-        .tag-ok { background: rgba(34, 197, 94, 0.2); color: var(--green); }
-        .tag-warn { background: rgba(239, 68, 68, 0.2); color: var(--red); }
-
-        #resultCard { display: none; }
-        .doc-output { width: 100%; min-height: 260px; background: #0f172a; border: 1px dashed var(--gold); padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #e2e8f0; resize: vertical; }
-        .copy-status { color: var(--green); font-size: 13px; font-weight: bold; margin-left: 10px; display: none; }
-
-        footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; border-top: 1px solid var(--border); margin-top: 30px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АИС Надзор | Прокуратура Тракторозаводского района</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #f8fafc; }
+  .box { max-width: 950px; margin: 20px auto; padding: 0 15px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-bottom: 18px; }
+  h1, h2, h3 { color: #eab308; margin-top: 0; }
+  input, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 5px; margin: 6px 0 14px; font-size: 14px; }
+  .btn { background: #eab308; color: #000; border: none; padding: 11px 18px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
+  .btn-blue { background: #3b82f6; color: #fff; }
+  .btn-gray { background: #334155; color: #fff; }
+  .nav { background: #1e293b; padding: 10px 15px; border-bottom: 2px solid #eab308; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .tab.active { background: #eab308; color: #000; border-color: #eab308; }
+  .page { display: none; }
+  .page.active { display: block; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { border: 1px solid #334155; padding: 10px; text-align: left; }
+  th { background: #0f172a; color: #eab308; }
+</style>
 </head>
 <body>
 
-<div id="loginScreen">
-    <div class="login-box">
-        <div style="font-size: 34px;">⚖️</div>
-        <h2>АИС «Надзор»</h2>
-        <p>Прокуратура Тракторозаводского района (ул. Белостоцкого, 11)</p>
-        <input type="text" id="empName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">
-        <input type="password" id="empPass" placeholder="Код доступа (введите: 7400)" onkeyup="if(event.keyCode===13) enterPortal()">
-        <button type="button" class="btn" style="width:100%;" onclick="enterPortal()">Войти в систему</button>
-        <p id="loginErr" style="color: var(--red); display:none; margin-top:10px; margin-bottom:0;">Неверный код доступа! Введите 7400.</p>
-    </div>
+<!-- ЭКРАН ВХОДА -->
+<div id="loginBox" style="max-width:400px; margin:60px auto; padding:25px; background:#1e293b; border:1px solid #334155; border-top:4px solid #eab308; border-radius:8px; text-align:center;">
+  <h2>⚖️ АИС «Надзор»</h2>
+  <p style="color:#94a3b8; font-size:13px;">Прокуратура Тракторозаводского района<br>ул. Белостоцкого, д. 11</p>
+  <input type="text" id="uName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">
+  <input type="password" id="uPass" placeholder="Код доступа (введите: 7400)">
+  <button type="button" class="btn" style="width:100%;" onclick="if(document.getElementById('uPass').value==='7400'){document.getElementById('loginBox').style.display='none';document.getElementById('appBox').style.display='block';document.getElementById('userTitle').innerText=document.getElementById('uName').value||'Прокурор';}else{document.getElementById('errText').style.display='block';}">Войти в систему</button>
+  <p id="errText" style="color:#ef4444; display:none; margin-bottom:0;">Неверный код! Введите 7400.</p>
 </div>
 
-<div id="mainApp">
-    <header>
-        <div class="brand">
-            <h1>⚖️ АИС «Надзор» — Прокуратура Тракторозаводского района</h1>
-            <span>Служебный портал | Тел.: +7 (993) 935-53-78 / +7 (969) 445-53-78</span>
-        </div>
-        <div class="user-badge">
-            <span>👤 Сотрудник: <strong id="currentUser">Прокурор</strong></span>
-            <button type="button" class="btn btn-sm" onclick="exitPortal()">Выход</button>
-        </div>
-    </header>
+<!-- КАБИНЕТ ПРОКУРОРА -->
+<div id="appBox" style="display:none;">
+  <div class="nav">
+    <div class="tabs">
+      <button type="button" class="tab active" onclick="showTab('p1', this)">📄 Создать документ</button>
+      <button type="button" class="tab" onclick="showTab('p2', this)">🗂️ Реестр дел</button>
+      <button type="button" class="tab" onclick="showTab('p3', this)">📖 Памятка УК</button>
+      <button type="button" class="tab" onclick="showTab('p4', this)">👥 Руководство</button>
+    </div>
+    <div>
+      <span style="font-size:13px; margin-right:10px;">👤 <strong id="userTitle">Прокурор</strong></span>
+      <button type="button" class="btn btn-gray" style="padding:6px 12px; font-size:12px;" onclick="document.getElementById('appBox').style.display='none';document.getElementById('loginBox').style.display='block';">Выход</button>
+    </div>
+  </div>
 
-    <nav>
-        <button type="button" class="tab-btn active" onclick="switchPage('generator', this)">📄 Создать документ / заявление</button>
-        <button type="button" class="tab-btn" onclick="switchPage('cases', this)">🗂️ Реестр дел и ордеров</button>
-        <button type="button" class="tab-btn" onclick="switchPage('codex', this)">📖 Памятка (УК/УПК)</button>
-        <button type="button" class="tab-btn" onclick="switchPage('staff', this)">👥 Руководство</button>
-    </nav>
+  <div class="box">
+    <!-- ВКЛАДКА 1: ГЕНЕРАТОР -->
+    <div id="p1" class="page active">
+      <div class="card">
+        <h3>Создание заявления или постановления</h3>
+        <label>Тип документа:</label>
+        <select id="dType">
+          <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>
+          <option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>
+          <option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>
+          <option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>
+        </select>
+        <label>Номер документа:</label>
+        <input type="text" id="dNum" value="№ 74-01/2026">
+        <label>В отношении кого (ФИО, звание, организация):</label>
+        <input type="text" id="dTarget" placeholder="Например: Лейтенант МВД Иванов И.И.">
+        <label>Основание (статья УК / УПК):</label>
+        <input type="text" id="dLaw" placeholder="Например: ст. 286 УК">
+        <label>Суть ситуации и требования:</label>
+        <textarea id="dText" rows="3" placeholder="Опишите обстоятельства дела..."></textarea>
+        <label>Подписывающее лицо:</label>
+        <select id="dSign">
+          <option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>
+          <option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>
+        </select>
+        <button type="button" class="btn" onclick="buildDoc()">Сформировать бланк</button>
+      </div>
 
-    <div class="container">
-        <div id="generator" class="section active">
-            <div class="grid-2">
-                <div class="card">
-                    <h3>Заполнение данных документа</h3>
-                    <label>Тип документа</label>
-                    <select id="docType">
-                        <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление / обращение в прокуратуру</option>
-                        <option value="ПОСТАНОВЛЕНИЕ о возбуждении уголовного дела">Постановление о возбуждении уголовного дела</option>
-                        <option value="ОРДЕР на задержание и обыск">Ордер на задержание и проведение обыска</option>
-                        <option value="ПОСТАНОВЛЕНИЕ о проведении прокурорской проверки">Постановление о прокурорской проверке</option>
-                    </select>
+      <div class="card" id="blankCard" style="display:none; border-color:#eab308;">
+        <h3>Готовый бланк документа</h3>
+        <textarea id="blankOut" rows="12" style="font-family:monospace; color:#eab308;" readonly></textarea>
+        <button type="button" class="btn btn-blue" onclick="var a=document.getElementById('blankOut');a.select();document.execCommand('copy');document.getElementById('okCopy').style.display='inline';">📋 Скопировать текст</button>
+        <span id="okCopy" style="color:#22c55e; font-weight:bold; margin-left:10px; display:none;">✅ Скопировано!</span>
+      </div>
+    </div>
 
-                    <label>Номер документа</label>
-                    <input type="text" id="docNum" value="№ 74-01/2026">
+    <!-- ВКЛАДКА 2: РЕЕСТР -->
+    <div id="p2" class="page">
+      <div class="card">
+        <h3>Реестр дел и ордеров</h3>
+        <table id="tCases">
+          <tr><th>№ Дела</th><th>Фигурант</th><th>Статья</th><th>Ответственный</th><th>Статус</th></tr>
+          <tr><td>УД-014</td><td>Лейтенант МВД Петров А.С.</td><td>ст. 286 УК</td><td>Зинченко А.А.</td><td style="color:#ef4444;font-weight:bold;">Ордер выдан</td></tr>
+          <tr><td>ПРОВ-008</td><td>Отдел полиции ТЗР</td><td>Проверка УПК</td><td>Зинченко Е.В.</td><td style="color:#eab308;font-weight:bold;">В работе</td></tr>
+          <tr><td>УД-011</td><td>Сидоров В.К.</td><td>ст. 291 УК</td><td>Зинченко А.А.</td><td style="color:#22c55e;font-weight:bold;">В суде</td></tr>
+        </table>
+      </div>
+    </div>
 
-                    <label>В отношении кого (ФИО, звание, организация)</label>
-                    <input type="text" id="docTarget" placeholder="Например: Сержант ППС Иванов И. И.">
+    <!-- ВКЛАДКА 3: ПАМЯТКА -->
+    <div id="p3" class="page">
+      <div class="card">
+        <h3>Статьи УК для надзора</h3>
+        <table>
+          <tr><th>Статья</th><th>Нарушение</th><th>Наказание</th></tr>
+          <tr><td><strong>ст. 285 УК</strong></td><td>Злоупотребление полномочиями</td><td>Увольнение + арест</td></tr>
+          <tr><td><strong>ст. 286 УК</strong></td><td>Превышение полномочиями</td><td>Увольнение + арест</td></tr>
+          <tr><td><strong>ст. 290 УК</strong></td><td>Получение взятки</td><td>Увольнение + ЧС</td></tr>
+          <tr><td><strong>ст. 301 УК</strong></td><td>Незаконное задержание</td><td>Увольнение + арест</td></tr>
+        </table>
+      </div>
+    </div>
 
-                    <label>Основание (статья УК / КоАП / УПК)</label>
-                    <input type="text" id="docLaw" placeholder="Например: ст. 286 УК">
+    <!-- ВКЛАДКА 4: РУКОВОДСТВО -->
+    <div id="p4" class="page">
+      <div class="card">
+        <h3>Руководство и контакты (ул. Белостоцкого, 11)</h3>
+        <p><strong>Прокурор района:</strong> Зинченко Артем Анатольевич — тел. +7 (993) 935-53-78</p>
+        <p><strong>Заместитель прокурора:</strong> Зинченко Елизавета Витальевна — тел. +7 (969) 445-53-78</p>
+        <p><strong>График приёма:</strong> Пн–Пт с 14:00 до 20:00, Сб с 15:00 до 18:00</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-                    <label>Суть ситуации и требования</label>
-                    <textarea id="docReason" rows="3" placeholder="Опишите обстоятельства дела..."></textarea>
+<script>
+function showTab(id, el) {
+  var pages = document.getElementsByClassName('page');
+  for (var i = 0; i < pages.length; i++) { pages[i].className = 'page'; }
+  var tabs = document.getElementsByClassName('tab');
+  for (var j = 0; j < tabs.length; j++) { tabs[j].className = 'tab'; }
+  document.getElementById(id).className = 'page active';
+  el.className = 'tab active';
+}
+function buildDoc() {
+  var t = document.getElementById('dType').value;
+  var n = document.getElementById('dNum').value;
+  var trg = document.getElementById('dTarget').value || '[Указать ФИО]';
+  var l = document.getElementById('dLaw').value || '[Указать статью]';
+  var txt = document.getElementById('dText').value || '[Описать суть]';
+  var s = document.getElementById('dSign').value;
+  var d = new Date().toLocaleDateString('ru-RU');
+  document.getElementById('blankOut').value = "ПРОКУРАТУРА ТРАКТОРОЗАВОДСКОГО РАЙОНА\nАдрес: ул. Белостоцкого, 11 | Тел.: +7 (993) 935-53-78\n--------------------------------------------------\n" + t + " " + n + " от " + d + "\nВ отношении: " + trg + "\nОснование: " + l + "\n\nСУТЬ:\n" + txt + "\n\n" + s + "\nПодпись: ____________ / М.П. /";
+  document.getElementById('blankCard').style.display = 'block';
+  document.getElementById('okCopy').style.display = 'none';
+}
+</script>
 
-                    <label>Должностное лицо / Заявитель</label>
-                    <select id="docSigner">
-                        <option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>
-                        <option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>
-                    </select>
-
-                    <button type="button" class="btn" onclick="createBlank()">Сформировать бланк</button>
-                </div>
-
-                <div class="card" id="resultCard">
-                    <h3>Готовый документ</h3>
-                    <p style="font-size:13px; color:var(--muted);">Бланк сформирован. Нажмите кнопку ниже, чтобы скопировать текст:</p>
-                    <textarea class="doc-output" id="docPreview" readonly></textarea>
-                    <div style="margin-top: 10px;">
-                        <button type="button" class="btn btn-blue" onclick="copyBlank()">📋 Скопировать документ</button>
-                        <span class="copy-status" id="copyStatus">✅ Скопировано!</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="cases" class="section">
-            <div class="card">
-                <h3>Активные дела, проверки и выданные ордера</h3>
-                <input type="text" id="caseSearch" onkeyup="filterTable()" placeholder="🔍 Поиск по номеру дела, фамилии или статье...">
-                <table id="casesTable">
-                    <tr>
-                        <th>№ Дела</th>
-                        <th>Фигурант / Организация</th>
-                        <th>Статья / Предмет</th>
-                        <th>Ответственный</th>
-                        <th>Статус</th>
-                    </tr>
-                    <tr>
-                        <td>УД-014</td>
-                        <td>Лейтенант МВД Петров А. С.</td>
-                        <td>ст. 286 УК (Превышение полномочий)</td>
-                        <td>Зинченко А. А.</td>
+</body>
+</html>
 
