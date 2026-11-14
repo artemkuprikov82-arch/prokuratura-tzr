@@ -1,220 +1,204 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АИС Надзор | Прокуратура Тракторозаводского района</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КрасноБелое — магазин у дома</title>
 <style>
-  * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #f8fafc; }
-  .box { max-width: 1050px; margin: 20px auto; padding: 0 15px; }
-  .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-bottom: 18px; }
-  h2, h3 { color: #eab308; margin-top: 0; }
-  .field, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 5px; margin: 6px 0 14px; font-size: 14px; min-height: 40px; text-align: left; }
-  .field:focus, select:focus, textarea:focus { outline: none; border-color: #eab308; }
-  .field:empty:before { content: attr(data-hint); color: #64748b; }
-  .btn { background: #eab308; color: #000; border: none; padding: 11px 18px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
-  .btn:hover { background: #ca8a04; }
-  .btn-blue { background: #3b82f6; color: #fff; }
-  .btn-gray { background: #334155; color: #fff; }
-  .btn-red { background: #dc2626; color: #fff; padding: 5px 10px; font-size: 12px; }
-  .nav { background: #1e293b; padding: 10px 15px; border-bottom: 2px solid #eab308; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tab { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-  .tab.active { background: #eab308; color: #000; border-color: #eab308; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { border: 1px solid #334155; padding: 9px; text-align: left; }
-  th { background: #0f172a; color: #eab308; }
-  .status-select { margin: 0; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer; min-height: auto; }
-  .add-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 18px; }
-  .add-grid .field, .add-grid select { margin: 4px 0 0; }
+  :root { --red:#d0021b; --dark:#222; --bg:#f7f7f7; }
+  * { box-sizing:border-box; margin:0; font-family:Arial, sans-serif; }
+  body { background:var(--bg); }
+
+  header { background:var(--red); color:#fff; padding:14px 24px;
+           display:flex; align-items:center; gap:24px; position:sticky; top:0; z-index:10; }
+  header .logo { font-size:22px; font-weight:bold; letter-spacing:1px; cursor:pointer; }
+  header input { flex:1; max-width:480px; padding:10px 14px; border:0; border-radius:6px; font-size:15px; }
+  .cart-btn { margin-left:auto; background:#fff; color:var(--red); border:0;
+              padding:10px 18px; border-radius:6px; font-weight:bold; cursor:pointer; }
+
+  .promo { background:#fff; margin:20px; padding:28px; border-radius:10px;
+           border-left:6px solid var(--red); }
+  .promo h1 { font-size:26px; margin-bottom:6px; }
+  .promo p { color:#666; }
+
+  .filters { display:flex; gap:10px; margin:0 20px 16px; flex-wrap:wrap; }
+  .filters button { padding:8px 16px; border:1px solid #ddd; background:#fff;
+                    border-radius:20px; cursor:pointer; }
+  .filters button.active { background:var(--red); color:#fff; border-color:var(--red); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+          gap:16px; margin:0 20px 40px; }
+  .card { background:#fff; border-radius:10px; padding:14px; display:flex;
+          flex-direction:column; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .card .img { background:#eee; border-radius:8px; height:130px; display:flex;
+               align-items:center; justify-content:center; font-size:44px; margin-bottom:10px; }
+  .card .name { font-size:15px; flex:1; }
+  .card .meta { color:#999; font-size:12px; margin:4px 0; }
+  .card .price { font-size:19px; font-weight:bold; }
+  .card .price s { color:#aaa; font-size:13px; font-weight:normal; margin-left:6px; }
+  .card .price span.red { color:var(--red); }
+  .add { margin-top:10px; background:var(--red); color:#fff; border:0;
+         padding:10px; border-radius:6px; cursor:pointer; font-size:14px; }
+  .add:active { transform:scale(.98); }
+  .badge { position:absolute; margin:4px; background:var(--red); color:#fff;
+           font-size:11px; padding:3px 8px; border-radius:4px; }
+
+  /* корзина */
+  #cartPanel { position:fixed; right:-420px; top:0; width:400px; height:100%;
+               background:#fff; box-shadow:-4px 0 16px rgba(0,0,0,.15);
+               transition:right .25s; display:flex; flex-direction:column; z-index:20; }
+  #cartPanel.open { right:0; }
+  #cartPanel h3 { padding:16px; background:var(--red); color:#fff; }
+  #cartItems { flex:1; overflow-y:auto; padding:12px; }
+  .cart-row { display:flex; justify-content:space-between; align-items:center;
+              border-bottom:1px solid #eee; padding:10px 0; gap:8px; }
+  .cart-row .qty { display:flex; gap:6px; align-items:center; }
+  .cart-row .qty button { width:26px; height:26px; border:1px solid #ddd;
+                          background:#fff; border-radius:4px; cursor:pointer; }
+  .cart-total { padding:16px; border-top:2px solid var(--red); font-size:18px; font-weight:bold; }
+  .checkout { margin:0 16px 16px; background:var(--red); color:#fff; border:0;
+              padding:14px; border-radius:8px; font-size:16px; cursor:pointer; }
+  .empty { color:#999; text-align:center; margin-top:40px; }
+
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:15; }
+  #overlay.show { display:block; }
+
+  footer { background:var(--dark); color:#aaa; text-align:center; padding:24px; font-size:13px; }
+  footer .warn { color:#e0a020; margin-bottom:6px; }
 </style>
 </head>
 <body>
 
-<div id="loginBox" style="max-width:400px; margin:60px auto; padding:25px; background:#1e293b; border:1px solid #334155; border-top:4px solid #eab308; border-radius:8px; text-align:center;">
-  <h2>⚖️ АИС «Надзор»</h2>
-  <p style="color:#94a3b8; font-size:13px;">Прокуратура Тракторозаводского района<br>ул. Белостоцкого, д. 11</p>
-  <div class="field" id="uName" contenteditable="true" data-hint="Ваша фамилия (напр. Зинченко А.А.)"></div>
-  <div class="field" id="uPass" contenteditable="true" data-hint="Код доступа (введите: 7400)"></div>
-  <button type="button" class="btn" style="width:100%;" onclick="checkAuth()">Войти в систему</button>
-  <p id="errText" style="color:#ef4444; display:none; margin-bottom:0;">Неверный код! Введите 7400.</p>
+<header>
+  <div class="logo" onclick="scrollTo(0,0)">КРАСНО<span style="color:#222">БЕЛОЕ</span></div>
+  <input id="search" placeholder="Поиск по каталогу..." oninput="render()">
+  <button class="cart-btn" onclick="toggleCart()">🛒 Корзина (<span id="cartCount">0</span>)</button>
+</header>
+
+<div class="promo">
+  <h1>Выгодно каждый день</h1>
+  <p>Акции на популярные товары. Доставка или самовывоз.</p>
 </div>
 
-<div id="appBox" style="display:none;">
-  <div class="nav">
-    <div class="tabs">
-      <button type="button" class="tab active" id="b1" onclick="goTab(1, this)">📄 Создать документ</button>
-      <button type="button" class="tab" id="b2" onclick="goTab(2, this)">🗂️ Реестр дел</button>
-      <button type="button" class="tab" id="b3" onclick="goTab(3, this)">📖 Памятка УК</button>
-      <button type="button" class="tab" id="b4" onclick="goTab(4, this)">👥 Руководство</button>
-    </div>
-    <div>
-      <span style="font-size:13px; margin-right:10px;">👤 <strong id="userTitle">Прокурор</strong></span>
-      <button type="button" class="btn btn-gray" style="padding:6px 12px; font-size:12px;" onclick="location.reload()">Выход</button>
-    </div>
-  </div>
+<div class="filters" id="filters"></div>
+<div class="grid" id="grid"></div>
 
-  <div class="box">
-    <div id="p1" style="display:block;">
-      <div class="card">
-        <h3>Создание заявления или постановления</h3>
-        <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">Заполните поля ниже. После нажатия кнопки бланк появится внизу, а дело автоматически добавится в «Реестр дел».</p>
-        
-        <label>Тип документа:</label>
-        <select id="dType">
-          <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>
-          <option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>
-          <option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>
-          <option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>
-        </select>
-
-        <label>Номер дела / документа:</label>
-        <div class="field" id="dNum" contenteditable="true" data-hint="Например: № 74-01/2026">№ 74-01/2026</div>
-
-        <label>Фигурант (в отношении кого — ФИО, звание, организация):</label>
-        <div class="field" id="dTarget" contenteditable="true" data-hint="Например: Лейтенант МВД Иванов И.И."></div>
-
-        <label>Статья / основание (УК / УПК / КоАП):</label>
-        <div class="field" id="dLaw" contenteditable="true" data-hint="Например: ст. 286 УК"></div>
-
-        <label>Суть ситуации и требования:</label>
-        <div class="field" id="dText" contenteditable="true" style="min-height:80px;" data-hint="Опишите обстоятельства дела..."></div>
-
-        <label>Ответственный прокурор:</label>
-        <select id="dSign">
-          <option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>
-          <option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>
-        </select>
-
-        <button type="button" class="btn" onclick="genBlank()">Сформировать бланк и внести в реестр</button>
-      </div>
-
-      <div class="card" id="blankCard" style="display:none; border-color:#eab308;">
-        <h3>Готовый бланк документа (запись добавлена в реестр)</h3>
-        <textarea id="blankOut" rows="12" style="font-family:monospace; color:#eab308;" readonly></textarea>
-        <button type="button" class="btn btn-blue" onclick="copyDocText()">📋 Скопировать текст</button>
-        <button type="button" class="btn btn-gray" style="margin-left:8px;" onclick="goTab(2, document.getElementById('b2'))">Перейти в реестр дел →</button>
-        <span id="okCopy" style="color:#22c55e; font-weight:bold; margin-left:10px; display:none;">✅ Скопировано!</span>
-      </div>
-    </div>
-
-    <div id="p2" style="display:none;">
-      <div class="card">
-        <h3>Реестр дел и ордеров (интерактивное управление)</h3>
-        
-        <div class="add-grid">
-          <div>
-            <label style="font-size:12px;">Номер дела</label>
-            <div class="field" id="mNum" contenteditable="true" data-hint="УД-015"></div>
-          </div>
-          <div>
-            <label style="font-size:12px;">Фигурант</label>
-            <div class="field" id="mTarget" contenteditable="true" data-hint="ФИО нарушителя"></div>
-          </div>
-          <div>
-            <label style="font-size:12px;">Статья</label>
-            <div class="field" id="mLaw" contenteditable="true" data-hint="ст. 286 УК"></div>
-          </div>
-          <div>
-            <label style="font-size:12px;">Ответственный</label>
-            <select id="mResp">
-              <option value="Зинченко А.А.">Зинченко А.А.</option>
-              <option value="Зинченко Е.В.">Зинченко Е.В.</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:12px;">Статус</label>
-            <select id="mStatus">
-              <option value="В работе">В работе</option>
-              <option value="Выдан ордер">Выдан ордер</option>
-              <option value="Передано в суд">Передано в суд</option>
-              <option value="Исполнено / Закрыто">Исполнено / Закрыто</option>
-            </select>
-          </div>
-          <div>
-            <button type="button" class="btn" style="width:100%;" onclick="addManualCase()">+ Добавить</button>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>№ Дела</th>
-              <th>Фигурант</th>
-              <th>Статья</th>
-              <th>Ответственный</th>
-              <th>Статус (нажмите для смены)</th>
-              <th style="width:50px;">Удал.</th>
-            </tr>
-          </thead>
-          <tbody id="casesBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="p3" style="display:none;">
-      <div class="card">
-        <h3>Статьи УК для надзора</h3>
-        <table>
-          <tr><th>Статья</th><th>Нарушение</th><th>Наказание</th></tr>
-          <tr><td><strong>ст. 285 УК</strong></td><td>Злоупотребление полномочиями</td><td>Увольнение + арест</td></tr>
-          <tr><td><strong>ст. 286 УК</strong></td><td>Превышение полномочиями</td><td>Увольнение + арест</td></tr>
-          <tr><td><strong>ст. 290 УК</strong></td><td>Получение взятки</td><td>Увольнение + ЧС</td></tr>
-          <tr><td><strong>ст. 301 УК</strong></td><td>Незаконное задержание</td><td>Увольнение + арест</td></tr>
-        </table>
-      </div>
-    </div>
-
-    <div id="p4" style="display:none;">
-      <div class="card">
-        <h3>Руководство и контакты (ул. Белостоцкого, 11)</h3>
-        <p><strong>Прокурор района:</strong> Зинченко Артем Анатольевич — тел. +7 (993) 935-53-78</p>
-        <p><strong>Заместитель прокурора:</strong> Зинченко Елизавета Витальевна — тел. +7 (969) 445-53-78</p>
-        <p><strong>График приёма:</strong> Пн–Пт с 14:00 до 20:00, Сб с 15:00 до 18:00</p>
-      </div>
-    </div>
-  </div>
+<div id="overlay" onclick="toggleCart()"></div>
+<div id="cartPanel">
+  <h3>Ваша корзина</h3>
+  <div id="cartItems"></div>
+  <div class="cart-total">Итого: <span id="cartTotal">0.00</span> ₽</div>
+  <button class="checkout" onclick="checkout()">Оформить заказ</button>
 </div>
+
+<footer>
+  <div class="warn">Продажа алкоголя и табака лицам младше 18 лет запрещена.</div>
+  ООО «Пример Ритейл». Демо-сайт. Все цены вымышленные.
+</footer>
 
 <script>
-var defaultCases = [
-  { num: "УД-014", target: "Лейтенант МВД Петров А.С.", law: "ст. 286 УК", resp: "Зинченко А.А.", status: "Выдан ордер" },
+const PRODUCTS = [
+  {id:1, name:"Пиво светлое фильтрованное 0,5 л", cat:"Алкоголь", emoji:"🍺", price:129, old:159, alc:true},
+  {id:2, name:"Вино красное сухое 0,7 л",          cat:"Алкоголь", emoji:"🍷", price:599, old:749, alc:true},
+  {id:3, name:"Водка классическая 0,5 л",          cat:"Алкоголь", emoji:"🥃", price:549, old:null, alc:true},
+  {id:4, name:"Сигареты (витрина-пример)",         cat:"Табак",    emoji:"🚬", price:250, old:null, alc:true},
+  {id:5, name:"Минеральная вода 0,5 л",            cat:"Напитки",  emoji:"💧", price:55,  old:null},
+  {id:6, name:"Кола 1,5 л",                        cat:"Напитки",  emoji:"🥤", price:98,  old:120},
+  {id:7, name:"Чипсы сырые 150 г",                 cat:"Снеки",    emoji:"🍟", price:99,  old:null},
+  {id:8, name:"Сухарики ржаные 40 г",              cat:"Снеки",    emoji:"🥨", price:45,  old:59},
+  {id:9, name:"Шоколад молочный 90 г",             cat:"Сладкое",  emoji:"🍫", price:89,  old:null},
+  {id:10,name:"Печенье сахарное 220 г",            cat:"Сладкое",  emoji:"🍪", price:64,  old:79},
+  {id:11,name:"Молоко пастеризованное 1 л",        cat:"Продукты", emoji:"🥛", price:79,  old:null},
+  {id:12,name:"Хлеб нарезной 400 г",               cat:"Продукты", emoji:"🍞", price:42,  old:null},
+];
 
-} else {
-document.getElementById('errText').style.display = 'block';
+const CATS = ["Все", ...new Set(PRODUCTS.map(p => p.cat))];
+let activeCat = "Все";
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+
+document.getElementById("filters").innerHTML = CATS.map(c =>
+  `<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join("");
+
+function setCat(c) {
+  activeCat = c;
+  document.querySelectorAll("#filters button").forEach(b =>
+    b.classList.toggle("active", b.textContent === c));
+  render();
 }
+
+function fmt(n) { return n.toFixed(2); }
+
+function render() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const grid = document.getElementById("grid");
+  const list = PRODUCTS.filter(p =>
+    (activeCat === "Все" || p.cat === activeCat) &&
+    p.name.toLowerCase().includes(q));
+  grid.innerHTML = list.map(p => {
+    const ageTag = p.alc ? `<div class="badge">18+</div>` : "";
+    return `<div class="card" style="position:relative">
+      ${ageTag}
+      <div class="img">${p.emoji}</div>
+      <div class="name">${p.name}</div>
+      <div class="meta">${p.cat}${p.alc ? " · продажа с 8:00 до 23:00" : ""}</div>
+      <div class="price">${fmt(p.price)} ₽${p.old ? `<s>${p.old} ₽</s>` : ""}</div>
+      <button class="add" onclick="add(${p.id})">В корзину</button>
+    </div>`;
+  }).join("") || `<p style="grid-column:1/-1;color:#999">Ничего не найдено</p>`;
 }
-function goTab(num, btn) {
-for (var k = 1; k <= 4; k++) {
-document.getElementById('p' + k).style.display = 'none';
-document.getElementById('b' + k).className = 'tab';
+
+function add(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  save(); renderCart();
 }
-document.getElementById('p' + num).style.display = 'block';
-btn.className = 'tab active';
-if (num === 2) renderTable();
+function dec(id) {
+  if (--cart[id] <= 0) delete cart[id];
+  save(); renderCart();
 }
-function genBlank() {
-var t = document.getElementById('dType').value;
-var n = document.getElementById('dNum').innerText.trim() || "№ 74-01/2026";
-var trg = document.getElementById('dTarget').innerText.trim() || '[Не указано]';
-var l = document.getElementById('dLaw').innerText.trim() || '[Не указано]';
-var txt = document.getElementById('dText').innerText.trim() || '[Не указано]';
-var s = document.getElementById('dSign').value;
-var shortResp = s.indexOf("Елизавета") > -1 ? "Зинченко Е.В." : "Зинченко А.А.";
-var startStatus = (t.indexOf("ОРДЕР") > -1) ? "Выдан ордер" : "В работе";
-var res = "ПРОКУРАТУРА ТРАКТОРОЗАВОДСКОГО РАЙОНА\nАдрес: ул. Белостоцкого, 11 | Тел.: +7 (993) 935-53-78\n--------------------------------------------------\n" +
-t + " " + n + "\nВ отношении: " + trg + "\nОснование: " + l + "\n\nСУТЬ:\n" + txt + "\n\n" + s + "\nПодпись: ____________ / М.П. /";
-document.getElementById('blankOut').value = res;
-document.getElementById('blankCard').style.display = 'block';
-document.getElementById('okCopy').style.display = 'none';
-var list = getCases();
-list.unshift({ num: n, target: trg, law: l, resp: shortResp, status: startStatus });
-saveCases(list);
+function save() { localStorage.setItem("cart", JSON.stringify(cart)); updateCount(); }
+
+function updateCount() {
+  document.getElementById("cartCount").textContent =
+    Object.values(cart).reduce((a,b) => a+b, 0);
 }
-function copyDocText() {
-var area = document.getElementById('blankOut');
-area.select();
-document.execCommand('copy');
-document.getElementById('okCopy').style.display = 'inline';
+
+function renderCart() {
+  const box = document.getElementById("cartItems");
+  const ids = Object.keys(cart);
+  if (!ids.length) {
+    box.innerHTML = `<div class="empty">Корзина пуста 🛒</div>`;
+  } else {
+    box.innerHTML = ids.map(id => {
+      const p = PRODUCTS.find(x => x.id == id);
+      return `<div class="cart-row">
+        <div style="flex:1">${p.emoji} ${p.name}</div>
+        <div class="qty">
+          <button onclick="dec(${id})">−</button>
+          <b>${cart[id]}</b>
+          <button onclick="add(${id})">+</button>
+        </div>
+        <div style="min-width:80px;text-align:right">${fmt(p.price*cart[id])} ₽</div>
+      </div>`;
+    }).join("");
+  }
+  const total = ids.reduce((s,id) =>
+    s + PRODUCTS.find(x => x.id == id).price * cart[id], 0);
+  document.getElementById("cartTotal").textContent = fmt(total);
 }
+
+function toggleCart() {
+  document.getElementById("cartPanel").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+}
+
+function checkout() {
+  if (!Object.keys(cart).length) { alert("Корзина пуста"); return; }
+  const total = document.getElementById("cartTotal").textContent;
+  alert(`Демо-заказ на ${total} ₽ оформлен!\n(реальная оплата и учёт — задача бэкенда)`);
+  cart = {}; save(); renderCart(); toggleCart();
+}
+
+updateCount(); render(); renderCart();
+</script>
+</body>
+</html>
