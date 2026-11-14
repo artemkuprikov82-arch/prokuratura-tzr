@@ -10,7 +10,9 @@
   .box { max-width: 1050px; margin: 20px auto; padding: 0 15px; }
   .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-bottom: 18px; }
   h2, h3 { color: #eab308; margin-top: 0; }
-  input, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 5px; margin: 6px 0 14px; font-size: 14px; }
+  .field, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 5px; margin: 6px 0 14px; font-size: 14px; min-height: 40px; text-align: left; }
+  .field:focus, select:focus, textarea:focus { outline: none; border-color: #eab308; }
+  .field:empty:before { content: attr(data-hint); color: #64748b; }
   .btn { background: #eab308; color: #000; border: none; padding: 11px 18px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
   .btn:hover { background: #ca8a04; }
   .btn-blue { background: #3b82f6; color: #fff; }
@@ -23,9 +25,9 @@
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { border: 1px solid #334155; padding: 9px; text-align: left; }
   th { background: #0f172a; color: #eab308; }
-  .status-select { margin: 0; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+  .status-select { margin: 0; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer; min-height: auto; }
   .add-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 18px; }
-  .add-grid input, .add-grid select { margin: 4px 0 0; }
+  .add-grid .field, .add-grid select { margin: 4px 0 0; }
 </style>
 </head>
 <body>
@@ -33,7 +35,8 @@
 <div id="loginBox" style="max-width:400px; margin:60px auto; padding:25px; background:#1e293b; border:1px solid #334155; border-top:4px solid #eab308; border-radius:8px; text-align:center;">
   <h2>⚖️ АИС «Надзор»</h2>
   <p style="color:#94a3b8; font-size:13px;">Прокуратура Тракторозаводского района<br>ул. Белостоцкого, д. 11</p>
-  <div id="loginFields"></div>
+  <div class="field" id="uName" contenteditable="true" data-hint="Ваша фамилия (напр. Зинченко А.А.)"></div>
+  <div class="field" id="uPass" contenteditable="true" data-hint="Код доступа (введите: 7400)"></div>
   <button type="button" class="btn" style="width:100%;" onclick="checkAuth()">Войти в систему</button>
   <p id="errText" style="color:#ef4444; display:none; margin-bottom:0;">Неверный код! Введите 7400.</p>
 </div>
@@ -56,14 +59,40 @@
     <div id="p1" style="display:block;">
       <div class="card">
         <h3>Создание заявления или постановления</h3>
-        <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">После нажатия «Сформировать бланк» документ автоматически попадёт в «Реестр дел».</p>
-        <div id="formContainer"></div>
+        <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">Заполните поля ниже. После нажатия кнопки бланк появится внизу, а дело автоматически добавится в «Реестр дел».</p>
+        
+        <label>Тип документа:</label>
+        <select id="dType">
+          <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>
+          <option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>
+          <option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>
+          <option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>
+        </select>
+
+        <label>Номер дела / документа:</label>
+        <div class="field" id="dNum" contenteditable="true" data-hint="Например: № 74-01/2026">№ 74-01/2026</div>
+
+        <label>Фигурант (в отношении кого — ФИО, звание, организация):</label>
+        <div class="field" id="dTarget" contenteditable="true" data-hint="Например: Лейтенант МВД Иванов И.И."></div>
+
+        <label>Статья / основание (УК / УПК / КоАП):</label>
+        <div class="field" id="dLaw" contenteditable="true" data-hint="Например: ст. 286 УК"></div>
+
+        <label>Суть ситуации и требования:</label>
+        <div class="field" id="dText" contenteditable="true" style="min-height:80px;" data-hint="Опишите обстоятельства дела..."></div>
+
+        <label>Ответственный прокурор:</label>
+        <select id="dSign">
+          <option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>
+          <option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>
+        </select>
+
         <button type="button" class="btn" onclick="genBlank()">Сформировать бланк и внести в реестр</button>
       </div>
 
       <div class="card" id="blankCard" style="display:none; border-color:#eab308;">
         <h3>Готовый бланк документа (запись добавлена в реестр)</h3>
-        <div id="outContainer"></div>
+        <textarea id="blankOut" rows="12" style="font-family:monospace; color:#eab308;" readonly></textarea>
         <button type="button" class="btn btn-blue" onclick="copyDocText()">📋 Скопировать текст</button>
         <button type="button" class="btn btn-gray" style="margin-left:8px;" onclick="goTab(2, document.getElementById('b2'))">Перейти в реестр дел →</button>
         <span id="okCopy" style="color:#22c55e; font-weight:bold; margin-left:10px; display:none;">✅ Скопировано!</span>
@@ -73,7 +102,41 @@
     <div id="p2" style="display:none;">
       <div class="card">
         <h3>Реестр дел и ордеров (интерактивное управление)</h3>
-        <div id="manualAddBox"></div>
+        
+        <div class="add-grid">
+          <div>
+            <label style="font-size:12px;">Номер дела</label>
+            <div class="field" id="mNum" contenteditable="true" data-hint="УД-015"></div>
+          </div>
+          <div>
+            <label style="font-size:12px;">Фигурант</label>
+            <div class="field" id="mTarget" contenteditable="true" data-hint="ФИО нарушителя"></div>
+          </div>
+          <div>
+            <label style="font-size:12px;">Статья</label>
+            <div class="field" id="mLaw" contenteditable="true" data-hint="ст. 286 УК"></div>
+          </div>
+          <div>
+            <label style="font-size:12px;">Ответственный</label>
+            <select id="mResp">
+              <option value="Зинченко А.А.">Зинченко А.А.</option>
+              <option value="Зинченко Е.В.">Зинченко Е.В.</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;">Статус</label>
+            <select id="mStatus">
+              <option value="В работе">В работе</option>
+              <option value="Выдан ордер">Выдан ордер</option>
+              <option value="Передано в суд">Передано в суд</option>
+              <option value="Исполнено / Закрыто">Исполнено / Закрыто</option>
+            </select>
+          </div>
+          <div>
+            <button type="button" class="btn" style="width:100%;" onclick="addManualCase()">+ Добавить</button>
+          </div>
+        </div>
+
         <table>
           <thead>
             <tr>
@@ -115,55 +178,43 @@
 </div>
 
 <script>
-// Автоматическая сборка всех полей при загрузке страницы
-window.onload = function() {
-  document.getElementById('loginFields').innerHTML =
-    '<input type="text" id="uName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">' +
-    '<input type="password" id="uPass" placeholder="Код доступа (введите: 7400)" onkeydown="if(event.key===\'Enter\') checkAuth()">';
-
-  document.getElementById('formContainer').innerHTML =
-    '<label>Тип документа:</label>' +
-    '<select id="dType">' +
-      '<option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>' +
-      '<option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>' +
-      '<option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>' +
-      '<option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>' +
-    '</select>' +
-    '<label>Номер дела / документа:</label>' +
-    '<input type="text" id="dNum" value="№ 74-01/2026">' +
-    '<label>Фигурант (в отношении кого — ФИО, звание, организация):</label>' +
-    '<input type="text" id="dTarget" placeholder="Например: Лейтенант МВД Иванов И.И.">' +
-    '<label>Статья / основание (УК / УПК / КоАП):</label>' +
-    '<input type="text" id="dLaw" placeholder="Например: ст. 286 УК">' +
-    '<label>Суть ситуации и требования:</label>' +
-    '<textarea id="dText" rows="3" placeholder="Опишите обстоятельства дела..."></textarea>' +
-    '<label>Ответственный прокурор:</label>' +
-    '<select id="dSign">' +
-      '<option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>' +
-      '<option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>' +
-    '</select>';
-
-  document.getElementById('outContainer').innerHTML =
-    '<textarea id="blankOut" rows="12" style="font-family:monospace; color:#eab308;" readonly></textarea>';
-
-  document.getElementById('manualAddBox').innerHTML =
-    '<div class="add-grid">' +
-      '<div><label style="font-size:12px;">Номер дела</label><input type="text" id="mNum" placeholder="УД-015"></div>' +
-      '<div><label style="font-size:12px;">Фигурант</label><input type="text" id="mTarget" placeholder="ФИО нарушителя"></div>' +
-      '<div><label style="font-size:12px;">Статья</label><input type="text" id="mLaw" placeholder="ст. 286 УК"></div>' +
-      '<div><label style="font-size:12px;">Ответственный</label><select id="mResp"><option value="Зинченко А.А.">Зинченко А.А.</option><option value="Зинченко Е.В.">Зинченко Е.В.</option></select></div>' +
-      '<div><label style="font-size:12px;">Статус</label><select id="mStatus"><option value="В работе">В работе</option><option value="Выдан ордер">Выдан ордер</option><option value="Передано в суд">Передано в суд</option><option value="Исполнено / Закрыто">Исполнено / Закрыто</option></select></div>' +
-      '<div><button type="button" class="btn" style="width:100%;" onclick="addManualCase()">+ Добавить</button></div>' +
-    '</div>';
-};
-
 var defaultCases = [
   { num: "УД-014", target: "Лейтенант МВД Петров А.С.", law: "ст. 286 УК", resp: "Зинченко А.А.", status: "Выдан ордер" },
-  { num: "ПРОВ-008", target: "Отдел полиции ТЗР", law: "Проверка УПК", resp: "Зинченко Е.В.", status: "В работе" },
-  { num: "УД-011", target: "Гражданин Сидоров В.К.", law: "ст. 291 УК", resp: "Зинченко А.А.", status: "Передано в суд" }
-];
 
-function getCases() {
-  try {
-    var saved = localStorage.getItem('prok_cases_v3');
-    if (saved) return JSON.parse(saved);
+} else {
+document.getElementById('errText').style.display = 'block';
+}
+}
+function goTab(num, btn) {
+for (var k = 1; k <= 4; k++) {
+document.getElementById('p' + k).style.display = 'none';
+document.getElementById('b' + k).className = 'tab';
+}
+document.getElementById('p' + num).style.display = 'block';
+btn.className = 'tab active';
+if (num === 2) renderTable();
+}
+function genBlank() {
+var t = document.getElementById('dType').value;
+var n = document.getElementById('dNum').innerText.trim() || "№ 74-01/2026";
+var trg = document.getElementById('dTarget').innerText.trim() || '[Не указано]';
+var l = document.getElementById('dLaw').innerText.trim() || '[Не указано]';
+var txt = document.getElementById('dText').innerText.trim() || '[Не указано]';
+var s = document.getElementById('dSign').value;
+var shortResp = s.indexOf("Елизавета") > -1 ? "Зинченко Е.В." : "Зинченко А.А.";
+var startStatus = (t.indexOf("ОРДЕР") > -1) ? "Выдан ордер" : "В работе";
+var res = "ПРОКУРАТУРА ТРАКТОРОЗАВОДСКОГО РАЙОНА\nАдрес: ул. Белостоцкого, 11 | Тел.: +7 (993) 935-53-78\n--------------------------------------------------\n" +
+t + " " + n + "\nВ отношении: " + trg + "\nОснование: " + l + "\n\nСУТЬ:\n" + txt + "\n\n" + s + "\nПодпись: ____________ / М.П. /";
+document.getElementById('blankOut').value = res;
+document.getElementById('blankCard').style.display = 'block';
+document.getElementById('okCopy').style.display = 'none';
+var list = getCases();
+list.unshift({ num: n, target: trg, law: l, resp: shortResp, status: startStatus });
+saveCases(list);
+}
+function copyDocText() {
+var area = document.getElementById('blankOut');
+area.select();
+document.execCommand('copy');
+document.getElementById('okCopy').style.display = 'inline';
+}
