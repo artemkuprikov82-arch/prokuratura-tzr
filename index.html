@@ -27,162 +27,13 @@
   .add-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 18px; }
   .add-grid input, .add-grid select { margin: 4px 0 0; }
 </style>
-<script>
-var defaultCases = [
-  { num: "УД-014", target: "Лейтенант МВД Петров А.С.", law: "ст. 286 УК", resp: "Зинченко А.А.", status: "Выдан ордер" },
-  { num: "ПРОВ-008", target: "Отдел полиции ТЗР", law: "Проверка УПК", resp: "Зинченко Е.В.", status: "В работе" },
-  { num: "УД-011", target: "Гражданин Сидоров В.К.", law: "ст. 291 УК", resp: "Зинченко А.А.", status: "Передано в суд" }
-];
-
-function getCases() {
-  try {
-    var saved = localStorage.getItem('prok_cases_v2');
-    if (saved) return JSON.parse(saved);
-    localStorage.setItem('prok_cases_v2', JSON.stringify(defaultCases));
-  } catch (e) {}
-  return defaultCases;
-}
-
-function saveCases(list) {
-  try {
-    localStorage.setItem('prok_cases_v2', JSON.stringify(list));
-  } catch (e) {}
-  defaultCases = list;
-  renderTable();
-}
-
-function getStatusColor(st) {
-  if (st === "Выдан ордер") return "#ef4444";
-  if (st === "В работе") return "#eab308";
-  if (st === "Передано в суд") return "#3b82f6";
-  return "#22c55e";
-}
-
-function renderTable() {
-  var list = getCases();
-  var tbody = document.getElementById('casesBody');
-  var html = "";
-  var opts = ["В работе", "Выдан ордер", "Передано в суд", "Исполнено / Закрыто"];
-  for (var i = 0; i < list.length; i++) {
-    var c = list[i];
-    var col = getStatusColor(c.status);
-    html += "<tr>";
-    html += "<td><strong>" + c.num + "</strong></td>";
-    html += "<td>" + c.target + "</td>";
-    html += "<td>" + c.law + "</td>";
-    html += "<td>" + c.resp + "</td>";
-    html += "<td><select class='status-select' style='color:" + col + "; border-color:" + col + ";' onchange='changeStatus(" + i + ", this.value)'>";
-    for (var j = 0; j < opts.length; j++) {
-      var sel = (c.status === opts[j]) ? "selected" : "";
-      html += "<option value='" + opts[j] + "' " + sel + " style='color:#fff; background:#0f172a;'>" + opts[j] + "</option>";
-    }
-    html += "</select></td>";
-    html += "<td style='text-align:center;'><button type='button' class='btn btn-red' onclick='delCase(" + i + ")'>✕</button></td>";
-    html += "</tr>";
-  }
-  tbody.innerHTML = html;
-}
-
-function changeStatus(idx, newSt) {
-  var list = getCases();
-  list[idx].status = newSt;
-  saveCases(list);
-}
-
-function delCase(idx) {
-  var list = getCases();
-  list.splice(idx, 1);
-  saveCases(list);
-}
-
-function addManualCase() {
-  var num = document.getElementById('mNum').value.trim() || "ДЕЛО-" + Math.floor(100 + Math.random() * 900);
-  var target = document.getElementById('mTarget').value.trim() || "Не указан";
-  var law = document.getElementById('mLaw').value.trim() || "Не указана";
-  var resp = document.getElementById('mResp').value;
-  var st = document.getElementById('mStatus').value;
-
-  var list = getCases();
-  list.unshift({ num: num, target: target, law: law, resp: resp, status: st });
-  saveCases(list);
-
-  document.getElementById('mNum').value = "";
-  document.getElementById('mTarget').value = "";
-  document.getElementById('mLaw').value = "";
-}
-
-function checkAuth() {
-  var p = document.getElementById('uPass').value.trim();
-  var n = document.getElementById('uName').value.trim();
-  if (p === '7400') {
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('appBox').style.display = 'block';
-    document.getElementById('userTitle').innerText = n || 'Прокурор';
-    renderTable();
-  } else {
-    document.getElementById('errText').style.display = 'block';
-  }
-}
-
-function goTab(num, btn) {
-  document.getElementById('p1').style.display = 'none';
-  document.getElementById('p2').style.display = 'none';
-  document.getElementById('p3').style.display = 'none';
-  document.getElementById('p4').style.display = 'none';
-  document.getElementById('p' + num).style.display = 'block';
-
-  document.getElementById('b1').className = 'tab';
-  document.getElementById('b2').className = 'tab';
-  document.getElementById('b3').className = 'tab';
-  document.getElementById('b4').className = 'tab';
-  btn.className = 'tab active';
-  if (num === 2) renderTable();
-}
-
-function genBlank() {
-  var t = document.getElementById('dType').value;
-  var n = document.getElementById('dNum').value.trim() || "№ 74-01/2026";
-  var trg = document.getElementById('dTarget').value.trim() || '[Не указано]';
-  var l = document.getElementById('dLaw').value.trim() || '[Не указано]';
-  var txt = document.getElementById('dText').value.trim() || '[Не указано]';
-  var s = document.getElementById('dSign').value;
-  var shortResp = s.indexOf("Елизавета") > -1 ? "Зинченко Е.В." : "Зинченко А.А.";
-  var startStatus = (t.indexOf("ОРДЕР") > -1) ? "Выдан ордер" : "В работе";
-
-  var res = "ПРОКУРАТУРА ТРАКТОРОЗАВОДСКОГО РАЙОНА\n";
-  res += "Адрес: ул. Белостоцкого, 11 | Тел.: +7 (993) 935-53-78\n";
-  res += "--------------------------------------------------\n";
-  res += t + " " + n + "\n";
-  res += "В отношении: " + trg + "\n";
-  res += "Основание: " + l + "\n\n";
-  res += "СУТЬ:\n" + txt + "\n\n";
-  res += s + "\n";
-  res += "Подпись: ____________ / М.П. /";
-
-  document.getElementById('blankOut').value = res;
-  document.getElementById('blankCard').style.display = 'block';
-  document.getElementById('okCopy').style.display = 'none';
-
-  var list = getCases();
-  list.unshift({ num: n, target: trg, law: l, resp: shortResp, status: startStatus });
-  saveCases(list);
-}
-
-function copyDocText() {
-  var area = document.getElementById('blankOut');
-  area.select();
-  document.execCommand('copy');
-  document.getElementById('okCopy').style.display = 'inline';
-}
-</script>
 </head>
 <body>
 
 <div id="loginBox" style="max-width:400px; margin:60px auto; padding:25px; background:#1e293b; border:1px solid #334155; border-top:4px solid #eab308; border-radius:8px; text-align:center;">
   <h2>⚖️ АИС «Надзор»</h2>
   <p style="color:#94a3b8; font-size:13px;">Прокуратура Тракторозаводского района<br>ул. Белостоцкого, д. 11</p>
-  <input type="text" id="uName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">
-  <input type="password" id="uPass" placeholder="Код доступа (введите: 7400)" onkeydown="if(event.key==='Enter') checkAuth()">
+  <div id="loginFields"></div>
   <button type="button" class="btn" style="width:100%;" onclick="checkAuth()">Войти в систему</button>
   <p id="errText" style="color:#ef4444; display:none; margin-bottom:0;">Неверный код! Введите 7400.</p>
 </div>
@@ -206,11 +57,113 @@ function copyDocText() {
       <div class="card">
         <h3>Создание заявления или постановления</h3>
         <p style="font-size:13px; color:#94a3b8; margin-top:-8px;">После нажатия «Сформировать бланк» документ автоматически попадёт в «Реестр дел».</p>
-        
-        <label>Тип документа:</label>
-        <select id="dType">
-          <option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>
-          <option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>
-          <option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>
-          <option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>
-        </select>
+        <div id="formContainer"></div>
+        <button type="button" class="btn" onclick="genBlank()">Сформировать бланк и внести в реестр</button>
+      </div>
+
+      <div class="card" id="blankCard" style="display:none; border-color:#eab308;">
+        <h3>Готовый бланк документа (запись добавлена в реестр)</h3>
+        <div id="outContainer"></div>
+        <button type="button" class="btn btn-blue" onclick="copyDocText()">📋 Скопировать текст</button>
+        <button type="button" class="btn btn-gray" style="margin-left:8px;" onclick="goTab(2, document.getElementById('b2'))">Перейти в реестр дел →</button>
+        <span id="okCopy" style="color:#22c55e; font-weight:bold; margin-left:10px; display:none;">✅ Скопировано!</span>
+      </div>
+    </div>
+
+    <div id="p2" style="display:none;">
+      <div class="card">
+        <h3>Реестр дел и ордеров (интерактивное управление)</h3>
+        <div id="manualAddBox"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>№ Дела</th>
+              <th>Фигурант</th>
+              <th>Статья</th>
+              <th>Ответственный</th>
+              <th>Статус (нажмите для смены)</th>
+              <th style="width:50px;">Удал.</th>
+            </tr>
+          </thead>
+          <tbody id="casesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="p3" style="display:none;">
+      <div class="card">
+        <h3>Статьи УК для надзора</h3>
+        <table>
+          <tr><th>Статья</th><th>Нарушение</th><th>Наказание</th></tr>
+          <tr><td><strong>ст. 285 УК</strong></td><td>Злоупотребление полномочиями</td><td>Увольнение + арест</td></tr>
+          <tr><td><strong>ст. 286 УК</strong></td><td>Превышение полномочиями</td><td>Увольнение + арест</td></tr>
+          <tr><td><strong>ст. 290 УК</strong></td><td>Получение взятки</td><td>Увольнение + ЧС</td></tr>
+          <tr><td><strong>ст. 301 УК</strong></td><td>Незаконное задержание</td><td>Увольнение + арест</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div id="p4" style="display:none;">
+      <div class="card">
+        <h3>Руководство и контакты (ул. Белостоцкого, 11)</h3>
+        <p><strong>Прокурор района:</strong> Зинченко Артем Анатольевич — тел. +7 (993) 935-53-78</p>
+        <p><strong>Заместитель прокурора:</strong> Зинченко Елизавета Витальевна — тел. +7 (969) 445-53-78</p>
+        <p><strong>График приёма:</strong> Пн–Пт с 14:00 до 20:00, Сб с 15:00 до 18:00</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Автоматическая сборка всех полей при загрузке страницы
+window.onload = function() {
+  document.getElementById('loginFields').innerHTML =
+    '<input type="text" id="uName" placeholder="Ваша фамилия (напр. Зинченко А.А.)">' +
+    '<input type="password" id="uPass" placeholder="Код доступа (введите: 7400)" onkeydown="if(event.key===\'Enter\') checkAuth()">';
+
+  document.getElementById('formContainer').innerHTML =
+    '<label>Тип документа:</label>' +
+    '<select id="dType">' +
+      '<option value="ЗАЯВЛЕНИЕ В ПРОКУРАТУРУ">Заявление в прокуратуру</option>' +
+      '<option value="ПОСТАНОВЛЕНИЕ о возбуждении дела">Постановление о возбуждении уголовного дела</option>' +
+      '<option value="ОРДЕР на арест и обыск">Ордер на задержание и обыск</option>' +
+      '<option value="ПОСТАНОВЛЕНИЕ о проверке">Постановление о прокурорской проверке</option>' +
+    '</select>' +
+    '<label>Номер дела / документа:</label>' +
+    '<input type="text" id="dNum" value="№ 74-01/2026">' +
+    '<label>Фигурант (в отношении кого — ФИО, звание, организация):</label>' +
+    '<input type="text" id="dTarget" placeholder="Например: Лейтенант МВД Иванов И.И.">' +
+    '<label>Статья / основание (УК / УПК / КоАП):</label>' +
+    '<input type="text" id="dLaw" placeholder="Например: ст. 286 УК">' +
+    '<label>Суть ситуации и требования:</label>' +
+    '<textarea id="dText" rows="3" placeholder="Опишите обстоятельства дела..."></textarea>' +
+    '<label>Ответственный прокурор:</label>' +
+    '<select id="dSign">' +
+      '<option value="Прокурор Тракторозаводского района — Зинченко Артем Анатольевич">Зинченко А. А. (Прокурор района)</option>' +
+      '<option value="Заместитель прокурора района — Зинченко Елизавета Витальевна">Зинченко Е. В. (Заместитель прокурора)</option>' +
+    '</select>';
+
+  document.getElementById('outContainer').innerHTML =
+    '<textarea id="blankOut" rows="12" style="font-family:monospace; color:#eab308;" readonly></textarea>';
+
+  document.getElementById('manualAddBox').innerHTML =
+    '<div class="add-grid">' +
+      '<div><label style="font-size:12px;">Номер дела</label><input type="text" id="mNum" placeholder="УД-015"></div>' +
+      '<div><label style="font-size:12px;">Фигурант</label><input type="text" id="mTarget" placeholder="ФИО нарушителя"></div>' +
+      '<div><label style="font-size:12px;">Статья</label><input type="text" id="mLaw" placeholder="ст. 286 УК"></div>' +
+      '<div><label style="font-size:12px;">Ответственный</label><select id="mResp"><option value="Зинченко А.А.">Зинченко А.А.</option><option value="Зинченко Е.В.">Зинченко Е.В.</option></select></div>' +
+      '<div><label style="font-size:12px;">Статус</label><select id="mStatus"><option value="В работе">В работе</option><option value="Выдан ордер">Выдан ордер</option><option value="Передано в суд">Передано в суд</option><option value="Исполнено / Закрыто">Исполнено / Закрыто</option></select></div>' +
+      '<div><button type="button" class="btn" style="width:100%;" onclick="addManualCase()">+ Добавить</button></div>' +
+    '</div>';
+};
+
+var defaultCases = [
+  { num: "УД-014", target: "Лейтенант МВД Петров А.С.", law: "ст. 286 УК", resp: "Зинченко А.А.", status: "Выдан ордер" },
+  { num: "ПРОВ-008", target: "Отдел полиции ТЗР", law: "Проверка УПК", resp: "Зинченко Е.В.", status: "В работе" },
+  { num: "УД-011", target: "Гражданин Сидоров В.К.", law: "ст. 291 УК", resp: "Зинченко А.А.", status: "Передано в суд" }
+];
+
+function getCases() {
+  try {
+    var saved = localStorage.getItem('prok_cases_v3');
+    if (saved) return JSON.parse(saved);
